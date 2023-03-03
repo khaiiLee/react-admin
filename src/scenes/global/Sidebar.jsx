@@ -96,7 +96,7 @@ const Sidebar = () => {
                   alt="profile-user"
                   width="100px"
                   height="100px"
-                  src={"../../assets/lucngu.png"}
+                  src={"https://i.ex-cdn.com/mgn.vn/files/content/2022/09/20/attack-on-titan-1559.jpg"}
                   style={{ cursor: "pointer", borderRadius: "50%" }}
                 />
               </Box>
@@ -107,10 +107,10 @@ const Sidebar = () => {
                   fontWeight="bold"
                   sx={{ m: "10px 0 0 0" }}
                 >
-                  Luc Nguyen
+                  Khai Le
                 </Typography>
                 <Typography variant="h5" color={colors.greenAccent[500]}>
-                  Label
+                  Super Admin
                 </Typography>
               </Box>
             </Box>
