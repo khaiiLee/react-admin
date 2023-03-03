@@ -36,6 +36,9 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "bin" : {
+    "execute" : "index.js"
+} ,
   "eslintConfig": {
     "extends": [
       "react-app",
