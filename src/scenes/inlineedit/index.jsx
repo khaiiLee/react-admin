@@ -93,7 +93,7 @@ export default function InlineEdit() {
         }}
       >
         <DataGrid
-          rows={rows} columns={columns}
+            editMode="row" rows={rows} columns={columns}
         />
       </Box>
     </Box>
@@ -105,6 +105,7 @@ const columns = [
     field: 'name',
     headerName: 'Name',
     width: 120,
+    editable: true,
   },
   {
     field: 'role',
