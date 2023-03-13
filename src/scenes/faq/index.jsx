@@ -4,12 +4,6 @@ import React, { useState } from 'react';
 import MaterialTable from '@material-table/core';
 import * as XLSX from 'xlsx'
 
-// import Accordion from "@mui/material/Accordion";
-// import AccordionSummary from "@mui/material/AccordionSummary";
-// import AccordionDetails from "@mui/material/AccordionDetails";
-// import Typography from "@mui/material/Typography";
-// import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-// import { tokens } from "../../theme";
 const EXTENSIONS = ['xlsx', 'xls', 'csv']
 const ImportFile = () => {
   const [colDefs, setColDefs] = useState()
@@ -80,7 +74,7 @@ const ImportFile = () => {
       <Box>
         <div className="App">
         <input type="file" onChange={importExcel} />
-        <MaterialTable title="Olympic Data" data={data} columns={colDefs}/>
+        <MaterialTable title="Import Table" data={data} columns={colDefs}/>
         </div>
       </Box>
     </Box>

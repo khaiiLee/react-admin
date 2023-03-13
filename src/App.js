@@ -14,6 +14,7 @@ import ImportFile from "./scenes/faq";
 import Geography from "./scenes/geography";
 import Calendar from "./scenes/calendar";
 import Sidebar from "./scenes/global/Sidebar";
+import InlineEdit from "./scenes/inlineedit"
 // import Import from "./scenes/import"
 
 function App() {
@@ -39,6 +40,7 @@ function App() {
               <Route path="/import" element={<ImportFile />} />
               <Route path="/geography" element={<Geography />} />
               <Route path="/calendar" element={<Calendar />} />
+              <Route path="/inlineedit" element={<InlineEdit/>}/>
             </Routes>
           </main>
         </div>
