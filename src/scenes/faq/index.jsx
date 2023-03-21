@@ -48,6 +48,7 @@ const ImportFile = () => {
         const heads = headers.map(head => ({ title: head, field: head }));
         console.log(heads);
         console.log(fileData);
+        console.log(fileName);
         setColDefs(heads);
 
         //removing header
