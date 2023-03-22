@@ -5,7 +5,7 @@ import MaterialTable from "@material-table/core";
 import * as XLSX from "xlsx";
 import axios from "axios";
 
-const EXTENSIONS = [ "xlsx", "xls", "csv" ];
+const EXTENSIONS = [ "xlsx", "xls" ];
 
 const ImportFile = () => {
   const [ colDefs, setColDefs ] = useState([]);
