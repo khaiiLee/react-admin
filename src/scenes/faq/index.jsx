@@ -5,7 +5,7 @@ import MaterialTable from "@material-table/core";
 import * as XLSX from "xlsx";
 import axios from "axios";
 
-const EXTENSIONS = [ "xlsx", "xls" ];
+const EXTENSIONS = [ "xlsx", "xls", "csv" ];
 
 const ImportFile = () => {
   const [ colDefs, setColDefs ] = useState([]);
@@ -59,18 +59,19 @@ const ImportFile = () => {
         // Push data to server
         try {
           const columns = Object.keys(jsonData[0]).concat(
-            "modifiedOn",
-            "fileName"
+            "created_date"
+            // "fileName"
           ); // thêm tên cột modifiedOn vào danh sách các cột
           const values = jsonData
             .map(item =>
               Object.values(item)
                 .map(value => `'${value}'`)
-                .concat("CURRENT_TIMESTAMP", "'" + fileName + "'")
+                // .concat("CURRENT_TIMESTAMP", "'" + fileName + "'")`
+                .concat("CURRENT_TIMESTAMP")
                 .join(",")
             )
             .join("),(");
-          const query = `INSERT INTO dbo.uit (${columns.join(
+          const query = `INSERT INTO dbo.react_app (${columns.join(
             ","
           )}) VALUES (${values})`;
           const response = await axios.post(
