@@ -73,7 +73,7 @@ const Contacts = () => {
         }}
       >
         <DataGrid
-          editMode="row"
+          checkboxSelection
           rows={data}
           columns={columns}
           getRowId={row => {
