@@ -59,19 +59,20 @@ const ImportFile = () => {
         // Push data to server
         try {
           const columns = Object.keys(jsonData[0]).concat(
-            "created_date"
-            // "fileName"
+            "created_date",
+            "fileName"
           ); // thêm tên cột modifiedOn vào danh sách các cột
           const values = jsonData
             .map(item =>
               Object.values(item)
                 .map(value => `'${value}'`)
-                // .concat("CURRENT_TIMESTAMP", "'" + fileName + "'")`
-                .concat("CURRENT_TIMESTAMP")
+                .concat("CURRENT_TIMESTAMP", "'" + fileName + "'")
                 .join(",")
             )
             .join("),(");
-          const query = `INSERT INTO dbo.react_app (${columns.join(
+          const query = `
+          TRUNCATE TABLE dbo.react_app_temp
+          INSERT INTO dbo.react_app_temp (${columns.join(
             ","
           )}) VALUES (${values})`;
           const response = await axios.post(

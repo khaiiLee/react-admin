@@ -16,7 +16,9 @@ import Calendar from "./scenes/calendar";
 import Sidebar from "./scenes/global/Sidebar";
 import InlineEdit from "./scenes/inlineedit";
 // import Import from "./scenes/import"
-
+import Config from "./scenes/config/Config";
+import Tabledropdown from "./scenes/tabledropdown/Tabledropdown";
+import TempTable from "./scenes/tempTable/TempTable";
 function App() {
   const [ theme, colorMode ] = useMode();
   return (
@@ -41,6 +43,9 @@ function App() {
               <Route path="/geography" element={<Geography />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/inlineedit" element={<InlineEdit />} />
+              <Route path="/config" element={<Config />} />
+              <Route path="/dropdown" element={<Tabledropdown />} />
+              <Route path="/temptable" element={<TempTable />} />
             </Routes>
           </main>
         </div>
