@@ -15,8 +15,9 @@ import PieChartOutlineOutlinedIcon from "@mui/icons-material/PieChartOutlineOutl
 import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
 import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
-import EditIcon from '@mui/icons-material/Edit';
-import ImportExportIcon from '@mui/icons-material/ImportExport';
+import EditIcon from "@mui/icons-material/Edit";
+import ImportExportIcon from "@mui/icons-material/ImportExport";
+import PermDataSettingIcon from "@mui/icons-material/PermDataSetting";
 
 const Item = ({ title, to, icon, selected, setSelected }) => {
   const theme = useTheme();
@@ -39,8 +40,8 @@ const Item = ({ title, to, icon, selected, setSelected }) => {
 const Sidebar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected, setSelected] = useState("Dashboard");
+  const [ isCollapsed, setIsCollapsed ] = useState(false);
+  const [ selected, setSelected ] = useState("Dashboard");
 
   return (
     <Box
@@ -97,7 +98,9 @@ const Sidebar = () => {
                   alt="profile-user"
                   width="100px"
                   height="100px"
-                  src={"https://i.ex-cdn.com/mgn.vn/files/content/2022/09/20/attack-on-titan-1559.jpg"}
+                  src={
+                    "https://i.ex-cdn.com/mgn.vn/files/content/2022/09/20/attack-on-titan-1559.jpg"
+                  }
                   style={{ cursor: "pointer", borderRadius: "50%" }}
                 />
               </Box>
@@ -161,6 +164,13 @@ const Sidebar = () => {
               selected={selected}
               setSelected={setSelected}
             />
+            <Item
+              title="Config"
+              to="/config"
+              icon={<PermDataSettingIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
 
             <Typography
               variant="h6"
@@ -190,7 +200,6 @@ const Sidebar = () => {
               selected={selected}
               setSelected={setSelected}
             />
-
             <Typography
               variant="h6"
               color={colors.grey[300]}

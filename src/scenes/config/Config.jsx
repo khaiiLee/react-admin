@@ -1,24 +1,21 @@
-import { Box } from "@mui/material";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import Header from "../../components/Header";
-import { useTheme } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
+import Header from "../../components/Header";
 import React, { useState, useEffect } from "react";
-
 import axios from "axios";
 
-const Contacts = () => {
+const Config = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [ data, setData ] = useState([]);
   const [ columns, setColumns ] = useState([]);
-
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await axios.get(`https://bill-be.onrender.com/mssql`, {
           params: {
-            query: "select top 100 * from dbo.react_app",
+            query: "select top 100 * from dbo.master",
             token: 123456,
           },
         });
@@ -37,10 +34,7 @@ const Contacts = () => {
 
   return (
     <Box m="20px">
-      <Header
-        title="CONTACTS"
-        subtitle="List of Contacts for Future Reference"
-      />
+      <Header title="Config" subtitle="Config Master Table" />
       <Box
         m="40px 0 0 0"
         height="75vh"
@@ -68,13 +62,9 @@ const Contacts = () => {
           "& .MuiCheckbox-root": {
             color: `${colors.greenAccent[200]} !important`,
           },
-          "& .MuiDataGrid-toolbarContainer .MuiButton-text": {
-            color: `${colors.grey[100]} !important`,
-          },
         }}
       >
         <DataGrid
-          checkboxSelection
           rows={data}
           columns={columns}
           getRowId={row => {
@@ -87,11 +77,9 @@ const Contacts = () => {
             }
             return id;
           }}
-          components={{ Toolbar: GridToolbar }}
         />
       </Box>
     </Box>
   );
 };
-
-export default Contacts;
+export default Config;
