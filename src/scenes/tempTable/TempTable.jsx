@@ -20,35 +20,23 @@ const TempTable = () => {
         const res = await axios.get(`https://bill-be.onrender.com/mssql`, {
           params: {
             query: `
-            SELECT 
-                CASE WHEN (TRY_CAST([athlete] AS VARCHAR) IS NULL AND [athlete] IS NOT NULL) 
-                    THEN '[error] ''' + CAST([athlete] AS NVARCHAR(500)) + ''' is not varchar' 
-                    ELSE [athlete] 
-                END [athlete],
-                CASE WHEN (TRY_CAST([age] AS INT) IS NULL AND [age] IS NOT NULL) 
-                    THEN '[error] ''' + CAST([age] AS NVARCHAR(500)) + ''' is not int' 
-                    ELSE [age] 
-                END [age],
-                [country],
-                [year],
-                CASE 
-                    WHEN (CASE WHEN (TRY_CAST([date] AS BIGINT) IS NULL AND [date] IS NOT NULL) 
-                        THEN '[error] ''' + CAST([date] AS NVARCHAR(500)) + ''' is not datetime' 
-                        ELSE [date] END) LIKE '_error_%' 
-                    THEN (CASE WHEN (TRY_CAST([date] AS BIGINT) IS NULL AND [date] IS NOT NULL) 
-                        THEN '[error] ''' + CAST([date] AS NVARCHAR(500)) + ''' is not datetime' 
-                        ELSE [date] END)
-                    ELSE DATEADD(DAY, TRY_CAST([date] AS BIGINT) - 2, '1900-01-01') 
-                END [date],
-                [sport],
-                [gold],
-                [silver],
-                [bronze],
-                [total]
-            FROM [dbo].[react_app_temp]
-            WHERE [age] LIKE '_error_%' 
-                OR [athlete] LIKE '_error_%' 
-                OR [date] LIKE '_error_%';
+            select
+*
+from
+(
+SELECT case when (try_cast([athlete] as varchar) is null and [athlete] is not null) then '[error] '''+cast([athlete] as nvarchar(500))+''' is not varchar' else [athlete]  end[athlete]
+,case when (try_cast([age] as int) is null and [age] is not null) then '[error] '''+cast([age] as nvarchar(500))+''' is not int' else [age] end [age]
+,[country]
+,[year]
+,case when (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end) like '_error_%' then (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end)
+	  else  dateadd(day,try_cast([date] as bigint)-2,'1900-01-01') end [date]
+,[sport]
+,[gold]
+,[silver]
+,[bronze]
+,[total]
+FROM [dbo].[react_app_temp]
+) a where [age] like '_error_%' or [athlete] like '_error_%' or [date] like '_error_%'
             `,
             token: 123456,
           },
@@ -72,46 +60,42 @@ const TempTable = () => {
         const res = await axios.get(`https://bill-be.onrender.com/mssql`, {
           params: {
             query: `
-            SELECT 
-                CASE
-                    WHEN (TRY_CAST([athlete] AS VARCHAR) IS NULL AND [athlete] IS NOT NULL)
-                    THEN '[error] ''' + CAST([athlete] AS NVARCHAR(500)) + ''' is not varchar'
-                    ELSE [athlete]
-                END [athlete],
-                CASE
-                    WHEN (TRY_CAST([age] AS INT) IS NULL AND [age] IS NOT NULL)
-                    THEN '[error] ''' + CAST([age] AS NVARCHAR(500)) + ''' is not int'
-                    ELSE [age]
-                END [age],
-                [country],
-                [year],
-                CASE 
-                    WHEN (CASE WHEN (TRY_CAST([date] AS BIGINT) IS NULL AND [date] IS NOT NULL) 
-                        THEN '[error] ''' + CAST([date] AS NVARCHAR(500)) + ''' is not datetime' 
-                        ELSE [date] END) LIKE '_error_%' 
-                    THEN (CASE WHEN (TRY_CAST([date] AS BIGINT) IS NULL AND [date] IS NOT NULL) 
-                        THEN '[error] ''' + CAST([date] AS NVARCHAR(500)) + ''' is not datetime' 
-                        ELSE [date] END)
-                    ELSE DATEADD(DAY, TRY_CAST([date] AS BIGINT) - 2, '1900-01-01') 
-                END [date],
-                [sport],
-                CASE
-                    WHEN (TRY_CAST([gold] AS INT) IS NULL AND [gold] IS NOT NULL)
-                    THEN '[error] ''' + CAST([gold] AS NVARCHAR(500)) + ''' is not datetime'
-                    ELSE [gold]
-                END [gold],
-                [silver],
-                [bronze],
-                [total]
-            FROM dbo.react_app_temp
-            WHERE [age] NOT LIKE '_error_%' 
-                AND [athlete] NOT LIKE '_error_%' 
-                AND [date] NOT LIKE '_error_%';
+            SELECT *
+FROM
+(
+    SELECT
+        CASE
+            WHEN (TRY_CAST([athlete] AS VARCHAR) IS NULL AND [athlete] IS NOT NULL)
+            THEN '[error] ''' + CAST([athlete] AS NVARCHAR(500)) + ''' is not varchar'
+            ELSE [athlete]
+        END [athlete],
+        CASE
+            WHEN (TRY_CAST([age] AS INT) IS NULL AND [age] IS NOT NULL)
+            THEN '[error] ''' + CAST([age] AS NVARCHAR(500)) + ''' is not int'
+            ELSE [age]
+        END [age],
+        [country],
+        [year],
+       case when (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end) like '_error_%' then (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end)
+	  else  dateadd(day,try_cast([date] as bigint)-2,'1900-01-01') end [date],
+        [sport],
+        CASE
+            WHEN (TRY_CAST([gold] AS INT) IS NULL AND [gold] IS NOT NULL)
+            THEN '[error] ''' + CAST([gold] AS NVARCHAR(500)) + ''' is not datetime'
+            ELSE [gold]
+        END [gold],
+        [silver],
+        [bronze],
+        [total]
+    FROM dbo.react_app_temp
+) a
+WHERE [age] NOT LIKE '_error_%' AND [athlete] NOT LIKE '_error_%' AND [date] NOT LIKE '_error_%';
             `,
             token: 123456,
           },
         });
         setData1(res.data.data || []); // add default value
+        console.log(res.data.data);
         setColumns1(
           Object.keys(res.data.data[0] || {}).map(item => {
             return { field: item, headerName: item, flex: 1 };
@@ -123,28 +107,6 @@ const TempTable = () => {
     };
     fetchData1();
   }, []);
-  // const handleTruncate = async () => {
-  //   try {
-  //     await axios.post(`https://bill-be.onrender.com/insert-mssql`, {
-  //       query: `TRUNCATE TABLE dbo.react_app_temp`,
-  //       token: 123456,
-  //     });
-  //     // Gọi lại API để lấy dữ liệu mới nhất
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
-  // useEffect(() => {
-  //   const handleBeforeUnload = () => {
-  //     handleTruncate();
-  //   };
-
-  //   window.addEventListener("beforeunload", handleBeforeUnload);
-
-  //   return () => {
-  //     window.removeEventListener("beforeunload", handleBeforeUnload);
-  //   };
-  // }, []);
 
   const handleUpload = async () => {
     try {
@@ -242,13 +204,9 @@ const TempTable = () => {
           },
         }}
       >
-        <Header title="CORRECT DATA" subtitle="Check correct data" />
-        <Box mb={2}>
-          <Button variant="contained" color="error" onClick={handleUpload}>
-            Upload
-          </Button>
-        </Box>
-
+        <Button variant="contained" color="error" onClick={handleUpload}>
+          Upload
+        </Button>
         <DataGrid
           rows={data1}
           columns={columns1}
@@ -265,7 +223,6 @@ const TempTable = () => {
         <Box mt={2}>
           <Header title="ERROR TABLE" subtitle="Check error data" />
         </Box>
-
         <DataGrid
           rows={data}
           columns={columns}
