@@ -6,6 +6,7 @@ import { tokens } from "../../theme";
 import React, { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
 import axios from "axios";
+import Select from "react-select";
 
 const EXTENSIONS = [ "xlsx", "xls", "csv" ];
 
@@ -17,6 +18,8 @@ const ImportFile = () => {
   const [ data1, setData1 ] = useState([]);
   const [ columns1, setColumns1 ] = useState([]);
   const [ showTable, setShowTable ] = useState(true);
+  const [ tables, setTables ] = useState([]);
+  const [ selectedTable, setSelectedTable ] = useState(null);
 
   const getExtension = file => {
     const parts = file.name.split(".");
@@ -35,7 +38,27 @@ const ImportFile = () => {
     });
     return rows;
   };
-
+  useEffect(() => {
+    axios
+      .get("https://bill-be.onrender.com/mssql", {
+        params: {
+          query: "select distinct Table_Name from dbo.config_table",
+          token: 123456,
+        },
+      })
+      .then(response => {
+        if (response.data.data && response.data.data.length > 0) {
+          const tableData = response.data.data;
+          const tableNames = tableData.map(record => record.Table_Name); // Thay đổi tên trường thành Table_Name
+          setTables(tableNames);
+          console.log(response.data.data);
+          console.log(tableNames);
+        }
+      })
+      .catch(error => {
+        console.error(error);
+      });
+  }, []);
   const importExcel = async e => {
     const file = e.target.files[0];
     const fileName = file.name; // lấy tên file
@@ -56,14 +79,15 @@ const ImportFile = () => {
         console.log(heads);
         console.log(fileData);
         console.log(fileName);
-        setColumns(heads);
+        // setColumns(heads);
 
         //removing header
         fileData.splice(0, 1);
 
         const jsonData = convertToJson(headers, fileData);
-        setData(jsonData);
+        // setData(jsonData);
         // Push data to server
+
         try {
           const columns = Object.keys(jsonData[0]).concat(
             "fileName",
@@ -83,8 +107,8 @@ const ImportFile = () => {
             )
             .join("),(");
           const query = `
-          TRUNCATE TABLE dbo.react_app_temp
-          INSERT INTO dbo.react_app_temp (${columns.join(
+          TRUNCATE TABLE ${selectedTable["value"]}_temp
+          INSERT INTO ${selectedTable["value"]}_temp (${columns.join(
             ","
           )}) VALUES (${values})`;
           const response = await axios.post(
@@ -93,12 +117,14 @@ const ImportFile = () => {
           );
           console.log(query);
           console.log(response.data);
-          window.location.reload();
+          // window.location.reload();
         } catch (error) {
           console.log(error);
         }
       };
       reader.readAsBinaryString(file);
+      getErrorData();
+      getSuccessData();
     } else {
       setData();
       setColumns();
@@ -106,12 +132,10 @@ const ImportFile = () => {
       alert("Invalid file input. Please select an Excel, CSV file");
     }
   };
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await axios.get(`https://bill-be.onrender.com/mssql`, {
-          params: {
-            query: `
+  let getErrorData = async () => {
+    const res = await axios.get(`https://bill-be.onrender.com/mssql`, {
+      params: {
+        query: `
             select
             *
             from
@@ -127,78 +151,69 @@ const ImportFile = () => {
             ,[silver]
             ,[bronze]
             ,[total]
-            FROM [dbo].[react_app_temp]
+            FROM ${selectedTable["value"]}_temp
             ) a where [age] like '_error_%' or [athlete] like '_error_%' or [date] like '_error_%'
             `,
-            token: 123456,
-          },
-        });
-        setData(res.data.data || []); // add default value
-        setColumns(
-          Object.keys(res.data.data[0] || {}).map(item => {
-            return { field: item, headerName: item, flex: 1 };
-          })
-        );
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData1 = async () => {
-      try {
-        const res = await axios.get(`https://bill-be.onrender.com/mssql`, {
-          params: {
-            query: `
-            SELECT *
-            FROM
-            (
-                SELECT
-                    CASE
-                        WHEN (TRY_CAST([athlete] AS VARCHAR) IS NULL AND [athlete] IS NOT NULL)
-                        THEN '[error] ''' + CAST([athlete] AS NVARCHAR(500)) + ''' is not varchar'
-                        ELSE [athlete]
-                    END [athlete],
-                    CASE
-                        WHEN (TRY_CAST([age] AS INT) IS NULL AND [age] IS NOT NULL)
-                        THEN '[error] ''' + CAST([age] AS NVARCHAR(500)) + ''' is not int'
-                        ELSE [age]
-                    END [age],
-                    [country],
-                    [year],
-                  case when (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end) like '_error_%' then (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end)
-                else  dateadd(day,try_cast([date] as bigint)-2,'1900-01-01') end [date],
-                    [sport],
-                    CASE
-                        WHEN (TRY_CAST([gold] AS INT) IS NULL AND [gold] IS NOT NULL)
-                        THEN '[error] ''' + CAST([gold] AS NVARCHAR(500)) + ''' is not datetime'
-                        ELSE [gold]
-                    END [gold],
-                    [silver],
-                    [bronze],
-                    [total]
-                FROM dbo.react_app_temp
-            ) a
-            WHERE [age] NOT LIKE '_error_%' AND [athlete] NOT LIKE '_error_%' AND [date] NOT LIKE '_error_%';
-            `,
-            token: 123456,
-          },
-        });
-        setData1(res.data.data || []); // add default value
-        console.log(res.data.data);
-        setColumns1(
-          Object.keys(res.data.data[0] || {}).map(item => {
-            return { field: item, headerName: item, flex: 1 };
-          })
-        );
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchData1();
-  }, []);
+        token: 123456,
+      },
+    });
+    setData(res.data.data || []); // add default value
+    setColumns(
+      Object.keys(res.data.data[0] || {}).map(item => {
+        return { field: item, headerName: item, flex: 1 };
+      })
+    );
+  };
+  let getSuccessData = async () => {
+    try {
+      const res = await axios.get(`https://bill-be.onrender.com/mssql`, {
+        params: {
+          query: `
+        SELECT *
+        FROM
+        (
+            SELECT
+                CASE
+                    WHEN (TRY_CAST([athlete] AS VARCHAR) IS NULL AND [athlete] IS NOT NULL)
+                    THEN '[error] ''' + CAST([athlete] AS NVARCHAR(500)) + ''' is not varchar'
+                    ELSE [athlete]
+                END [athlete],
+                CASE
+                    WHEN (TRY_CAST([age] AS INT) IS NULL AND [age] IS NOT NULL)
+                    THEN '[error] ''' + CAST([age] AS NVARCHAR(500)) + ''' is not int'
+                    ELSE [age]
+                END [age],
+                [country],
+                [year],
+              case when (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end) like '_error_%' then (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end)
+            else  dateadd(day,try_cast([date] as bigint)-2,'1900-01-01') end [date],
+                [sport],
+                CASE
+                    WHEN (TRY_CAST([gold] AS INT) IS NULL AND [gold] IS NOT NULL)
+                    THEN '[error] ''' + CAST([gold] AS NVARCHAR(500)) + ''' is not datetime'
+                    ELSE [gold]
+                END [gold],
+                [silver],
+                [bronze],
+                [total]
+            FROM ${selectedTable["value"]}_temp
+        ) a
+        WHERE [age] NOT LIKE '_error_%' AND [athlete] NOT LIKE '_error_%' AND [date] NOT LIKE '_error_%';
+        `,
+          token: 123456,
+        },
+      });
+      setData1(res.data.data || []); // add default value
+      console.log(res.data.data);
+      setColumns1(
+        Object.keys(res.data.data[0] || {}).map(item => {
+          return { field: item, headerName: item, flex: 1 };
+        })
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleUpload = async () => {
     try {
@@ -211,7 +226,7 @@ const ImportFile = () => {
       // Upload dữ liệu mới
       await axios.post(`https://bill-be.onrender.com/insert-mssql`, {
         query: `
-        INSERT INTO dbo.react_app
+        INSERT INTO ${selectedTable["value"]}
         SELECT *
         FROM
         (
@@ -246,7 +261,7 @@ const ImportFile = () => {
                 [total],
             [created_date],
             [fileName]
-            FROM dbo.react_app_temp
+            FROM ${selectedTable["value"]}_temp
         ) a
         WHERE [age] NOT LIKE '_error_%' AND [athlete] NOT LIKE '_error_%' AND [date] NOT LIKE '_error_%';
         `,
@@ -256,7 +271,7 @@ const ImportFile = () => {
       // Lấy dữ liệu mới nhất từ server
       const res = await axios.get(`https://bill-be.onrender.com/mssql`, {
         params: {
-          query: `SELECT * FROM dbo.react_app_temp`,
+          query: `SELECT * FROM ${selectedTable["value"]}_temp`,
           token: 123456,
         },
       });
@@ -267,6 +282,22 @@ const ImportFile = () => {
       console.error(error);
     }
   };
+  const handleTableChange = selectedOption => {
+    console.log(selectedOption);
+    setSelectedTable(selectedOption);
+  };
+
+  const tableOptions = tables.map(table => ({
+    value: table,
+    label: table,
+  }));
+  const customStyles = {
+    option: (provided, state) => ({
+      ...provided,
+      color: "black",
+    }),
+  };
+
   return (
     <Box m="20px">
       <Box
@@ -302,6 +333,14 @@ const ImportFile = () => {
         }}
       >
         <Header title="IMPORT" subtitle="Import XLSX or CSV" />
+        <Box mt={2} mb={2}>
+          <Select
+            value={selectedTable}
+            onChange={handleTableChange}
+            options={tableOptions}
+            styles={customStyles}
+          />
+        </Box>
         <input type="file" onChange={importExcel} />
         <DataGrid
           rows={data1}
