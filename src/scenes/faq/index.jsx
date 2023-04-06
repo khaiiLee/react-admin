@@ -16,6 +16,7 @@ const ImportFile = () => {
   const [ columns, setColumns ] = useState([]);
   const [ data1, setData1 ] = useState([]);
   const [ columns1, setColumns1 ] = useState([]);
+  const [ showTable, setShowTable ] = useState(true);
 
   const getExtension = file => {
     const parts = file.name.split(".");
@@ -65,14 +66,19 @@ const ImportFile = () => {
         // Push data to server
         try {
           const columns = Object.keys(jsonData[0]).concat(
+            "fileName",
             "created_date",
-            "fileName"
+            "updated_date"
           ); // thêm tên cột modifiedOn vào danh sách các cột
           const values = jsonData
             .map(item =>
               Object.values(item)
                 .map(value => `'${value}'`)
-                .concat("CURRENT_TIMESTAMP", "'" + fileName + "'")
+                .concat(
+                  "'" + fileName + "'",
+                  "CURRENT_TIMESTAMP",
+                  "CURRENT_TIMESTAMP"
+                )
                 .join(",")
             )
             .join("),(");
@@ -87,6 +93,7 @@ const ImportFile = () => {
           );
           console.log(query);
           console.log(response.data);
+          window.location.reload();
         } catch (error) {
           console.log(error);
         }
@@ -106,22 +113,22 @@ const ImportFile = () => {
           params: {
             query: `
             select
-*
-from
-(
-SELECT case when (try_cast([athlete] as varchar) is null and [athlete] is not null) then '[error] '''+cast([athlete] as nvarchar(500))+''' is not varchar' else [athlete]  end[athlete]
-,case when (try_cast([age] as int) is null and [age] is not null) then '[error] '''+cast([age] as nvarchar(500))+''' is not int' else [age] end [age]
-,[country]
-,[year]
-,case when (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end) like '_error_%' then (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end)
-	  else  dateadd(day,try_cast([date] as bigint)-2,'1900-01-01') end [date]
-,[sport]
-,[gold]
-,[silver]
-,[bronze]
-,[total]
-FROM [dbo].[react_app_temp]
-) a where [age] like '_error_%' or [athlete] like '_error_%' or [date] like '_error_%'
+            *
+            from
+            (
+            SELECT case when (try_cast([athlete] as varchar) is null and [athlete] is not null) then '[error] '''+cast([athlete] as nvarchar(500))+''' is not varchar' else [athlete]  end[athlete]
+            ,case when (try_cast([age] as int) is null and [age] is not null) then '[error] '''+cast([age] as nvarchar(500))+''' is not int' else [age] end [age]
+            ,[country]
+            ,[year]
+            ,case when (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end) like '_error_%' then (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end)
+                else  dateadd(day,try_cast([date] as bigint)-2,'1900-01-01') end [date]
+            ,[sport]
+            ,[gold]
+            ,[silver]
+            ,[bronze]
+            ,[total]
+            FROM [dbo].[react_app_temp]
+            ) a where [age] like '_error_%' or [athlete] like '_error_%' or [date] like '_error_%'
             `,
             token: 123456,
           },
@@ -146,35 +153,35 @@ FROM [dbo].[react_app_temp]
           params: {
             query: `
             SELECT *
-FROM
-(
-    SELECT
-        CASE
-            WHEN (TRY_CAST([athlete] AS VARCHAR) IS NULL AND [athlete] IS NOT NULL)
-            THEN '[error] ''' + CAST([athlete] AS NVARCHAR(500)) + ''' is not varchar'
-            ELSE [athlete]
-        END [athlete],
-        CASE
-            WHEN (TRY_CAST([age] AS INT) IS NULL AND [age] IS NOT NULL)
-            THEN '[error] ''' + CAST([age] AS NVARCHAR(500)) + ''' is not int'
-            ELSE [age]
-        END [age],
-        [country],
-        [year],
-       case when (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end) like '_error_%' then (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end)
-	  else  dateadd(day,try_cast([date] as bigint)-2,'1900-01-01') end [date],
-        [sport],
-        CASE
-            WHEN (TRY_CAST([gold] AS INT) IS NULL AND [gold] IS NOT NULL)
-            THEN '[error] ''' + CAST([gold] AS NVARCHAR(500)) + ''' is not datetime'
-            ELSE [gold]
-        END [gold],
-        [silver],
-        [bronze],
-        [total]
-    FROM dbo.react_app_temp
-) a
-WHERE [age] NOT LIKE '_error_%' AND [athlete] NOT LIKE '_error_%' AND [date] NOT LIKE '_error_%';
+            FROM
+            (
+                SELECT
+                    CASE
+                        WHEN (TRY_CAST([athlete] AS VARCHAR) IS NULL AND [athlete] IS NOT NULL)
+                        THEN '[error] ''' + CAST([athlete] AS NVARCHAR(500)) + ''' is not varchar'
+                        ELSE [athlete]
+                    END [athlete],
+                    CASE
+                        WHEN (TRY_CAST([age] AS INT) IS NULL AND [age] IS NOT NULL)
+                        THEN '[error] ''' + CAST([age] AS NVARCHAR(500)) + ''' is not int'
+                        ELSE [age]
+                    END [age],
+                    [country],
+                    [year],
+                  case when (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end) like '_error_%' then (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end)
+                else  dateadd(day,try_cast([date] as bigint)-2,'1900-01-01') end [date],
+                    [sport],
+                    CASE
+                        WHEN (TRY_CAST([gold] AS INT) IS NULL AND [gold] IS NOT NULL)
+                        THEN '[error] ''' + CAST([gold] AS NVARCHAR(500)) + ''' is not datetime'
+                        ELSE [gold]
+                    END [gold],
+                    [silver],
+                    [bronze],
+                    [total]
+                FROM dbo.react_app_temp
+            ) a
+            WHERE [age] NOT LIKE '_error_%' AND [athlete] NOT LIKE '_error_%' AND [date] NOT LIKE '_error_%';
             `,
             token: 123456,
           },
@@ -200,7 +207,7 @@ WHERE [age] NOT LIKE '_error_%' AND [athlete] NOT LIKE '_error_%' AND [date] NOT
         alert("Error! Please check data agian");
         return;
       }
-
+      setShowTable(false); // Ẩn bảng
       // Upload dữ liệu mới
       await axios.post(`https://bill-be.onrender.com/insert-mssql`, {
         query: `
@@ -209,6 +216,11 @@ WHERE [age] NOT LIKE '_error_%' AND [athlete] NOT LIKE '_error_%' AND [date] NOT
         FROM
         (
             SELECT
+                CASE
+                    WHEN (TRY_CAST([id] AS VARCHAR) IS NULL AND [id] IS NOT NULL)
+                    THEN '[error] ''' + CAST([id] AS NVARCHAR(500)) + ''' is not varchar'
+                    ELSE [id]
+                END [athlete],
                 CASE
                     WHEN (TRY_CAST([athlete] AS VARCHAR) IS NULL AND [athlete] IS NOT NULL)
                     THEN '[error] ''' + CAST([athlete] AS NVARCHAR(500)) + ''' is not varchar'
@@ -250,6 +262,7 @@ WHERE [age] NOT LIKE '_error_%' AND [athlete] NOT LIKE '_error_%' AND [date] NOT
       });
       setData(res.data.data || []); // Cập nhật lại state với dữ liệu mới nhất
       alert("Data uploaded successfully!");
+      window.location.reload();
     } catch (error) {
       console.error(error);
     }
@@ -290,9 +303,6 @@ WHERE [age] NOT LIKE '_error_%' AND [athlete] NOT LIKE '_error_%' AND [date] NOT
       >
         <Header title="IMPORT" subtitle="Import XLSX or CSV" />
         <input type="file" onChange={importExcel} />
-        <Button variant="contained" color="error" onClick={handleUpload}>
-          Upload
-        </Button>
         <DataGrid
           rows={data1}
           columns={columns1}
@@ -306,22 +316,33 @@ WHERE [age] NOT LIKE '_error_%' AND [athlete] NOT LIKE '_error_%' AND [date] NOT
             return id;
           }}
         />
-        <Box mt={2}>
-          <Header title="ERROR TABLE" subtitle="Check error data" />
+        <Box mt={2} mb={2} marginLeft={140}>
+          <Button variant="contained" color="warning" onClick={handleUpload}>
+            SUBMIT
+          </Button>
         </Box>
-        <DataGrid
-          rows={data}
-          columns={columns}
-          getRowId={row => {
-            let id = "";
-            for (const key in row) {
-              if (row.hasOwnProperty(key)) {
-                id += row[key];
+        {showTable &&
+        data.length > 0 && (
+          <Box mt={2}>
+            <Header title="ERROR TABLE" subtitle="Check error data" />
+          </Box>
+        )}
+        {showTable &&
+        data.length > 0 && (
+          <DataGrid
+            rows={data}
+            columns={columns}
+            getRowId={row => {
+              let id = "";
+              for (const key in row) {
+                if (row.hasOwnProperty(key)) {
+                  id += row[key];
+                }
               }
-            }
-            return id;
-          }}
-        />
+              return id;
+            }}
+          />
+        )}
       </Box>
     </Box>
   );

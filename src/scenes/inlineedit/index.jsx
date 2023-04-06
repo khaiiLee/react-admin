@@ -1,7 +1,7 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import Select from '@mui/material/Select';
-import { DataGrid, useGridApiContext } from '@mui/x-data-grid';
+import * as React from "react";
+import PropTypes from "prop-types";
+import Select from "@mui/material/Select";
+import { DataGrid, useGridApiContext } from "@mui/x-data-grid";
 import Header from "../../components/Header";
 import { tokens } from "../../theme";
 import { Box, useTheme } from "@mui/material";
@@ -10,11 +10,14 @@ function SelectEditInputCell(props) {
   const { id, value, field } = props;
   const apiRef = useGridApiContext();
 
-  const handleChange = async (event) => {
-    await apiRef.current.setEditCellValue({ id, field, value: event.target.value });
+  const handleChange = async event => {
+    await apiRef.current.setEditCellValue({
+      id,
+      field,
+      value: event.target.value,
+    });
     apiRef.current.stopCellEditMode({ id, field });
   };
-
   return (
     <Select
       value={value}
@@ -32,34 +35,26 @@ function SelectEditInputCell(props) {
 }
 
 SelectEditInputCell.propTypes = {
-  /**
-   * The column field of the cell that triggered the event.
-   */
   field: PropTypes.string.isRequired,
-  /**
-   * The grid row id.
-   */
-  id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
-  /**
-   * The cell value.
-   * If the column has `valueGetter`, use `params.row` to directly access the fields.
-   */
+  id: PropTypes.oneOfType([ PropTypes.number, PropTypes.string ]).isRequired,
   value: PropTypes.any,
 };
 
-const renderSelectEditInputCell = (params) => {
+const renderSelectEditInputCell = params => {
   return <SelectEditInputCell {...params} />;
 };
 
 export default function InlineEdit() {
-    const theme = useTheme();
-    const colors = tokens(theme.palette.mode);
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+
+  const handleRowEditCommit = event => {
+    console.log("updated rows", event);
+  };
+
   return (
     <Box m="20px">
-      <Header
-        title="INLINE EDIT"
-        subtitle="You can edit here"
-      />
+      <Header title="INLINE EDIT" subtitle="You can edit here" />
       <Box
         m="40px 0 0 0"
         height="75vh"
@@ -93,7 +88,10 @@ export default function InlineEdit() {
         }}
       >
         <DataGrid
-            editMode="row" rows={rows} columns={columns}
+          editMode="row"
+          rows={rows}
+          columns={columns}
+          onEditRowsModelChange={handleRowEditCommit}
         />
       </Box>
     </Box>
@@ -102,14 +100,14 @@ export default function InlineEdit() {
 
 const columns = [
   {
-    field: 'name',
-    headerName: 'Name',
+    field: "name",
+    headerName: "Name",
     width: 120,
     editable: true,
   },
   {
-    field: 'role',
-    headerName: 'Role',
+    field: "role",
+    headerName: "Role",
     renderEditCell: renderSelectEditInputCell,
     editable: true,
     width: 180,
@@ -119,17 +117,17 @@ const columns = [
 const rows = [
   {
     id: 1,
-    name: 'Olivier',
-    role: 'Back-end Developer',
+    name: "Olivier",
+    role: "Back-end Developer",
   },
   {
     id: 2,
-    name: 'Danail',
-    role: 'UX Designer',
+    name: "Danail",
+    role: "UX Designer",
   },
   {
     id: 3,
-    name: 'Matheus',
-    role: 'Front-end Developer',
+    name: "Matheus",
+    role: "Front-end Developer",
   },
 ];
