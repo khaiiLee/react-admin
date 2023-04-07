@@ -117,14 +117,14 @@ const ImportFile = () => {
           );
           console.log(query);
           console.log(response.data);
+          getErrorData();
+          getSuccessData();
           // window.location.reload();
         } catch (error) {
           console.log(error);
         }
       };
       reader.readAsBinaryString(file);
-      getErrorData();
-      getSuccessData();
     } else {
       setData();
       setColumns();
@@ -133,30 +133,54 @@ const ImportFile = () => {
     }
   };
   let getErrorData = async () => {
+    let query = `
+    SELECT *
+    FROM
+    (
+        SELECT
+            CASE
+                WHEN (TRY_CAST([id] AS VARCHAR) IS NULL AND [id] IS NOT NULL)
+                THEN '[error] ''' + CAST([id] AS NVARCHAR(500)) + ''' is not varchar'
+                ELSE [id]
+            END [id],
+            CASE
+                WHEN (TRY_CAST([athlete] AS VARCHAR) IS NULL AND [athlete] IS NOT NULL)
+                THEN '[error] ''' + CAST([athlete] AS NVARCHAR(500)) + ''' is not varchar'
+                ELSE [athlete]
+            END [athlete],
+            CASE
+                WHEN (TRY_CAST([age] AS INT) IS NULL AND [age] IS NOT NULL)
+                THEN '[error] ''' + CAST([age] AS NVARCHAR(500)) + ''' is not int'
+                ELSE [age]
+            END [age],
+            [country],
+    case when (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end) like '_error_%' then (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end)
+        else  dateadd(day,try_cast([date] as bigint)-2,'1900-01-01') end [date],
+            [year],
+            [sport],
+            CASE
+                WHEN (TRY_CAST([gold] AS INT) IS NULL AND [gold] IS NOT NULL)
+                THEN '[error] ''' + CAST([gold] AS NVARCHAR(500)) + ''' is not datetime'
+                ELSE [gold]
+            END [gold],
+            [silver],
+            [bronze],
+            [total],
+        [fileName],
+  [created_date],
+  [updated_date] from
+  ${selectedTable["value"]}_temp
+    ) a
+    WHERE [age] LIKE '_error_%' AND [athlete] LIKE '_error_%' AND [date] LIKE '_error_%';
+        `;
     const res = await axios.get(`https://bill-be.onrender.com/mssql`, {
       params: {
-        query: `
-            select
-            *
-            from
-            (
-            SELECT case when (try_cast([athlete] as varchar) is null and [athlete] is not null) then '[error] '''+cast([athlete] as nvarchar(500))+''' is not varchar' else [athlete]  end[athlete]
-            ,case when (try_cast([age] as int) is null and [age] is not null) then '[error] '''+cast([age] as nvarchar(500))+''' is not int' else [age] end [age]
-            ,[country]
-            ,[year]
-            ,case when (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end) like '_error_%' then (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end)
-                else  dateadd(day,try_cast([date] as bigint)-2,'1900-01-01') end [date]
-            ,[sport]
-            ,[gold]
-            ,[silver]
-            ,[bronze]
-            ,[total]
-            FROM ${selectedTable["value"]}_temp
-            ) a where [age] like '_error_%' or [athlete] like '_error_%' or [date] like '_error_%'
-            `,
+        query: query,
         token: 123456,
       },
     });
+    console.log(query);
+    console.log(res.data.data);
     setData(res.data.data || []); // add default value
     setColumns(
       Object.keys(res.data.data[0] || {}).map(item => {
@@ -169,36 +193,44 @@ const ImportFile = () => {
       const res = await axios.get(`https://bill-be.onrender.com/mssql`, {
         params: {
           query: `
-        SELECT *
-        FROM
-        (
-            SELECT
-                CASE
-                    WHEN (TRY_CAST([athlete] AS VARCHAR) IS NULL AND [athlete] IS NOT NULL)
-                    THEN '[error] ''' + CAST([athlete] AS NVARCHAR(500)) + ''' is not varchar'
-                    ELSE [athlete]
-                END [athlete],
-                CASE
-                    WHEN (TRY_CAST([age] AS INT) IS NULL AND [age] IS NOT NULL)
-                    THEN '[error] ''' + CAST([age] AS NVARCHAR(500)) + ''' is not int'
-                    ELSE [age]
-                END [age],
-                [country],
-                [year],
-              case when (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end) like '_error_%' then (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end)
-            else  dateadd(day,try_cast([date] as bigint)-2,'1900-01-01') end [date],
-                [sport],
-                CASE
-                    WHEN (TRY_CAST([gold] AS INT) IS NULL AND [gold] IS NOT NULL)
-                    THEN '[error] ''' + CAST([gold] AS NVARCHAR(500)) + ''' is not datetime'
-                    ELSE [gold]
-                END [gold],
-                [silver],
-                [bronze],
-                [total]
-            FROM ${selectedTable["value"]}_temp
-        ) a
-        WHERE [age] NOT LIKE '_error_%' AND [athlete] NOT LIKE '_error_%' AND [date] NOT LIKE '_error_%';
+          SELECT *
+          FROM
+          (
+              SELECT
+                  CASE
+                      WHEN (TRY_CAST([id] AS VARCHAR) IS NULL AND [id] IS NOT NULL)
+                      THEN '[error] ''' + CAST([id] AS NVARCHAR(500)) + ''' is not varchar'
+                      ELSE [id]
+                  END [id],
+                  CASE
+                      WHEN (TRY_CAST([athlete] AS VARCHAR) IS NULL AND [athlete] IS NOT NULL)
+                      THEN '[error] ''' + CAST([athlete] AS NVARCHAR(500)) + ''' is not varchar'
+                      ELSE [athlete]
+                  END [athlete],
+                  CASE
+                      WHEN (TRY_CAST([age] AS INT) IS NULL AND [age] IS NOT NULL)
+                      THEN '[error] ''' + CAST([age] AS NVARCHAR(500)) + ''' is not int'
+                      ELSE [age]
+                  END [age],
+                  [country],
+          case when (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end) like '_error_%' then (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end)
+              else  dateadd(day,try_cast([date] as bigint)-2,'1900-01-01') end [date],
+                  [year],
+                  [sport],
+                  CASE
+                      WHEN (TRY_CAST([gold] AS INT) IS NULL AND [gold] IS NOT NULL)
+                      THEN '[error] ''' + CAST([gold] AS NVARCHAR(500)) + ''' is not datetime'
+                      ELSE [gold]
+                  END [gold],
+                  [silver],
+                  [bronze],
+                  [total],
+              [fileName],
+        [created_date],
+        [updated_date] from
+        ${selectedTable["value"]}_temp
+          ) a
+          WHERE [age] NOT LIKE '_error_%' AND [athlete] NOT LIKE '_error_%' AND [date] NOT LIKE '_error_%';
         `,
           token: 123456,
         },
@@ -235,7 +267,7 @@ const ImportFile = () => {
                     WHEN (TRY_CAST([id] AS VARCHAR) IS NULL AND [id] IS NOT NULL)
                     THEN '[error] ''' + CAST([id] AS NVARCHAR(500)) + ''' is not varchar'
                     ELSE [id]
-                END [athlete],
+                END [id],
                 CASE
                     WHEN (TRY_CAST([athlete] AS VARCHAR) IS NULL AND [athlete] IS NOT NULL)
                     THEN '[error] ''' + CAST([athlete] AS NVARCHAR(500)) + ''' is not varchar'
@@ -247,9 +279,9 @@ const ImportFile = () => {
                     ELSE [age]
                 END [age],
                 [country],
-                [year],
-              case when (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end) like '_error_%' then (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end)
+				case when (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end) like '_error_%' then (case when (try_cast([date] as bigint) is null and [date] is not null) then '[error] '''+cast([date] as nvarchar(500))+''' is not datetime' else [date] end)
             else  dateadd(day,try_cast([date] as bigint)-2,'1900-01-01') end [date],
+                [year],
                 [sport],
                 CASE
                     WHEN (TRY_CAST([gold] AS INT) IS NULL AND [gold] IS NOT NULL)
@@ -259,9 +291,10 @@ const ImportFile = () => {
                 [silver],
                 [bronze],
                 [total],
-            [created_date],
-            [fileName]
-            FROM ${selectedTable["value"]}_temp
+            [fileName],
+			[created_date],
+			[updated_date] from
+      ${selectedTable["value"]}_temp
         ) a
         WHERE [age] NOT LIKE '_error_%' AND [athlete] NOT LIKE '_error_%' AND [date] NOT LIKE '_error_%';
         `,
